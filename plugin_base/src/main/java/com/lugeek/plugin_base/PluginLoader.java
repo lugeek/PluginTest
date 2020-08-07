@@ -35,6 +35,31 @@ public class PluginLoader {
 
         pluginPackageArchiveInfo = context.getPackageManager().getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
 
+        createResources(dexPath);
+    }
+
+    /**
+     * 从插件apk获取Resources，参考了Shadow的实现，没有用到反射。
+     * 在小米手机上，Resources是MiuiResources，不过不影响使用。
+     * @param dexPath 插件apk路径
+     */
+    private void createResources(String dexPath) {
+        PackageManager packageManager = context.getPackageManager();
+        pluginPackageArchiveInfo.applicationInfo.publicSourceDir = dexPath;
+        pluginPackageArchiveInfo.applicationInfo.sourceDir = dexPath;
+        pluginPackageArchiveInfo.applicationInfo.sharedLibraryFiles = context.getApplicationInfo().sharedLibraryFiles;
+        try {
+            pluginResources = packageManager.getResourcesForApplication(pluginPackageArchiveInfo.applicationInfo);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 从插件apk获取Resources，这种方式是网上大部分的用法，但是用到了反射，在版本更新后，可能会有兼容性的风险，作为备选。
+     * @param dexPath 插件apk路径
+     */
+    private void createResourcesByReflect(String dexPath) {
         AssetManager assets = null;
         try {
             assets = AssetManager.class.newInstance();
