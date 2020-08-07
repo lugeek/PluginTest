@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/host" />
             <option value="$PROJECT_DIR$/plugin" />
+            <option value="$PROJECT_DIR$/plugin_base" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
