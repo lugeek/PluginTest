@@ -8,9 +8,16 @@
     tools:context=".MainActivity">
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:onClick="buttonClick"/>
+        android:text="普通类插件化"
+        android:onClick="normalClassPluginClick"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Activity插件化"
+        android:onClick="activityClassPluginClick"/>
 
 </LinearLayout>
