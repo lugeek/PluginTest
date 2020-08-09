@@ -18,6 +18,7 @@
         <activity android:name=".NormalClassPluginActivity"/>
         <activity android:name=".ProxyActivity"/>
         <activity android:name=".ViewHolderPluginActivity"/>
+        <activity android:name=".FragmentPluginActivity"/>
     </application>
 
 </manifest>

@@ -47,4 +47,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ViewHolderPluginActivity.class);
         this.startActivity(intent);
     }
+
+    public void fragmentPluginClick(View button) {
+        Intent intent = new Intent(this, FragmentPluginActivity.class);
+        this.startActivity(intent);
+    }
 }
