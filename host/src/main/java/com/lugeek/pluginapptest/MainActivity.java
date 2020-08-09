@@ -42,4 +42,9 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("activityName", activityName);
         this.startActivity(intent);
     }
+
+    public void viewHolderPluginClick(View button) {
+        Intent intent = new Intent(this, ViewHolderPluginActivity.class);
+        this.startActivity(intent);
+    }
 }

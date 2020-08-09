@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -98,6 +99,52 @@ public class PluginLoader {
         return pluginInterface;
     }
 
+    public <T> T loadClass(String className) {
+        T instance = null;
+        try {
+            Class<?> aClass = getPluginDexClassLoader().loadClass(className);
+            instance = (T)aClass.newInstance();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
+        return instance;
+    }
+
+    public <T> T loadClass(String className, Object... params) {
+        T instance = null;
+        try {
+            Class<?>[] paramsClasses = new Class<?>[params.length];
+            for (int i = 0; i < params.length; i++) {
+                paramsClasses[i] = params[i].getClass();
+            }
+            Class<?> aClass = getPluginDexClassLoader().loadClass(className);
+//            Constructor aConstructor=aClass.getDeclaredConstructor(paramsClasses);
+            Constructor aConstructor = findConstructor(aClass, params);
+            aConstructor.setAccessible(true);
+            instance = (T)aConstructor.newInstance(params);
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
+        return instance;
+    }
+
     public DexClassLoader getPluginDexClassLoader() {
         return pluginDexClassLoader;
     }
@@ -108,5 +155,61 @@ public class PluginLoader {
 
     public PackageInfo getPluginPackageArchiveInfo() {
         return pluginPackageArchiveInfo;
+    }
+
+    public PluginContextWrapper getPluginContextWrapper(Context context) {
+        return new PluginContextWrapper(context, getPluginResources(), getPluginDexClassLoader());
+    }
+
+    public static <T> Constructor<T> findConstructor(Class<T> clazz, Object... args) throws NoSuchMethodException
+    {
+        Constructor<T> matchingConstructor = null;
+        Constructor<T>[] constructors = (Constructor<T>[]) clazz.getConstructors();
+        for (Constructor<T> constructor : constructors)
+        {
+//            if (constructor.getParameterCount() != args.length)
+//            {
+//                continue;
+//            }
+            Class<?>[] formalTypes = constructor.getParameterTypes();
+            if (formalTypes.length != args.length) {
+                continue;
+            }
+            for (int i = 0; i < formalTypes.length; i++)
+            {
+                if (!formalTypes[i].isInstance(args[i]))
+                {
+                    continue;
+                }
+            }
+            if (matchingConstructor != null) // already found one ... so there is more than one ...
+            {
+                throw new NoSuchMethodException("Multiple constructors found: " + printArgs(clazz, args) + " --> " + matchingConstructor + " --> " + constructor);
+            }
+            matchingConstructor = constructor;
+        }
+        if (matchingConstructor == null)
+        {
+            throw new NoSuchMethodException("No constructor found for: " + printArgs(clazz, args));
+        }
+        return matchingConstructor;
+    }
+
+    private static String printArgs(Class<?> clazz, Object... args)
+    {
+        StringBuilder msg = new StringBuilder();
+        msg.append("new ");
+        msg.append(clazz.getName());
+        msg.append("(");
+        for (int i = 0; i < args.length; i++)
+        {
+            if (i > 0)
+            {
+                msg.append(", ");
+            }
+            msg.append(args[i] == null ? "null" : args[i].getClass().getName());
+        }
+        msg.append(")");
+        return msg.toString();
     }
 }

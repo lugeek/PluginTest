@@ -17,6 +17,7 @@
         </activity>
         <activity android:name=".NormalClassPluginActivity"/>
         <activity android:name=".ProxyActivity"/>
+        <activity android:name=".ViewHolderPluginActivity"/>
     </application>
 
 </manifest>
