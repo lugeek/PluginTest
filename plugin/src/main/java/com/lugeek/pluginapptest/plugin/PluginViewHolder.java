@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.lugeek.plugin_base.PluginLoader;
 import com.lugeek.plugin_base.PluginViewHolderInterface;
-import com.lugeek.pluginapptest.R;
 
 public class PluginViewHolder extends RecyclerView.ViewHolder implements PluginViewHolderInterface {
 

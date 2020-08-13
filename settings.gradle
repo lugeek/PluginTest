@@ -1,3 +1,4 @@
+include ':plugin_app'
 include ':plugin_base'
 include ':plugin'
 include ':host'

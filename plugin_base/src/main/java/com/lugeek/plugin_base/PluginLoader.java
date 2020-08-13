@@ -5,6 +5,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.util.Log;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -29,6 +31,11 @@ public class PluginLoader {
 
     public void setContext(Context context) {
         this.context = context.getApplicationContext();
+        TypedArray a = this.context.obtainStyledAttributes(android.support.v7.appcompat.R.styleable.AppCompatTheme);
+        if (!a.hasValue(android.support.v7.appcompat.R.styleable.AppCompatTheme_windowActionBar)) {
+            a.recycle();
+            Log.i("crash", "crash");
+        }
     }
 
     public void loadApk(String dexPath) {

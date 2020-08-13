@@ -1,13 +1,15 @@
 package com.lugeek.pluginapptest.plugin;
 
 import android.annotation.SuppressLint;
+import android.content.res.Resources;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
 import com.lugeek.plugin_base.PluginActivityInterface;
-import com.lugeek.pluginapptest.R;
+import com.lugeek.plugin_base.PluginLoader;
 
 public class MainActivity extends AppCompatActivity implements PluginActivityInterface {
 
@@ -16,7 +18,7 @@ public class MainActivity extends AppCompatActivity implements PluginActivityInt
     @SuppressLint("MissingSuperCall")
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        mHostContext.setContentView(R.layout.activity_main);
+        mHostContext.setContentView(LayoutInflater.from(mHostContext).inflate(R.layout.activity_main, null, false));
         mHostContext.findViewById(R.id.zan).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -28,6 +30,11 @@ public class MainActivity extends AppCompatActivity implements PluginActivityInt
     @Override
     public void attachContext(AppCompatActivity context) {
         mHostContext = context;
+    }
+
+    @Override
+    public Resources getResources() {
+        return PluginLoader.getInstance().getPluginResources();
     }
 
     @SuppressLint("MissingSuperCall")

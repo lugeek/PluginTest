@@ -1,9 +1,11 @@
 package com.lugeek.pluginapptest;
 
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.lugeek.plugin_base.PluginActivityInterface;
 import com.lugeek.plugin_base.PluginLoader;
@@ -14,6 +16,11 @@ public class ProxyActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        TypedArray a = this.obtainStyledAttributes(android.support.v7.appcompat.R.styleable.AppCompatTheme);
+        if (!a.hasValue(android.support.v7.appcompat.R.styleable.AppCompatTheme_windowActionBar)) {
+            a.recycle();
+            Log.i("crash", "crash");
+        }
         super.onCreate(savedInstanceState);
         String activityName = getIntent().getStringExtra("activityName");
         mPluginActivity = PluginLoader.getInstance().loadActivity(activityName);
@@ -24,7 +31,7 @@ public class ProxyActivity extends AppCompatActivity {
 
     @Override
     public Resources getResources() {
-        return PluginLoader.getInstance().getPluginResources();
+        return mPluginActivity != null ? mPluginActivity.getResources() : super.getResources();
     }
 
     @Override

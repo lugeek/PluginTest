@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.lugeek.plugin_base.PluginLoader;
-import com.lugeek.pluginapptest.R;
 
 public class PluginFragment extends Fragment {
 

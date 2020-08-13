@@ -2,9 +2,11 @@ package com.lugeek.pluginapptest;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.lugeek.plugin_base.FileUtil;
@@ -12,7 +14,7 @@ import com.lugeek.plugin_base.PluginLoader;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String pluginAppFileName = "plugin-debug.apk";
+    private String pluginAppFileName = "plugin_app-debug.apk";
 
     @Override
     protected void attachBaseContext(Context newBase) {
