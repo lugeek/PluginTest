@@ -1,5 +1,6 @@
 package com.lugeek.pluginapptest.plugin;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,6 +14,9 @@ import com.lugeek.plugin_base.PluginLoader;
 
 public class PluginFragment extends Fragment {
 
+    /**
+     * inflater一定要替换，否则会遇到Fragment already added错误。
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -28,5 +32,11 @@ public class PluginFragment extends Fragment {
                 imageView.setImageResource(R.drawable.plugin_zan);
             }
         });
+    }
+
+    @Nullable
+    @Override
+    public Context getContext() {
+        return PluginLoader.getInstance().getPluginContextWrapper(super.getContext());
     }
 }

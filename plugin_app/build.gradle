@@ -23,6 +23,13 @@ android {
             proguardFiles 'proguard-rules.pro', 'proguard-mapping.pro'
         }
     }
+
+    aaptOptions {
+        // --allow-reserved-package-id: 允许使用小于0x7F的保留字段
+        // --package-id 指定package-id部分的id，默认为0x7F
+        // 为了保证插件和宿主的id不冲突，将插件id的前缀改成0x70
+        additionalParameters '--allow-reserved-package-id', '--package-id', '0x70'
+    }
 }
 
 dependencies {

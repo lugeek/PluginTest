@@ -86,6 +86,33 @@ public class PluginLoader {
         pluginResources = new Resources(assets, context.getResources().getDisplayMetrics(), context.getResources().getConfiguration());
     }
 
+    /**
+     * 创建插件和宿主资源合并的resource
+     * @param dexPath 插件apk路径
+     */
+    private void createMergedResourcesByReflect(String dexPath) {
+        AssetManager assetManager = null;
+        try {
+            assetManager = AssetManager.class.newInstance();
+            Method addAssetPath = AssetManager.class.getMethod("addAssetPath", String.class);
+            addAssetPath.setAccessible(true);
+            addAssetPath.invoke(assetManager, context.getPackageResourcePath()); // 添加宿主资源路径
+            addAssetPath.invoke(assetManager, dexPath); // 添加插件资源路径
+
+
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        }
+        pluginResources = new Resources(assetManager, context.getResources().getDisplayMetrics(),
+                context.getResources().getConfiguration());
+    }
+
     public PluginActivityInterface loadActivity(String activityName) {
         PluginActivityInterface pluginInterface = null;
         try {

@@ -9,14 +9,27 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewStub;
+
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
 
 public class PluginContextWrapper extends ContextThemeWrapper {
     private Resources mResources;
     private LayoutInflater mInflater;
     private ClassLoader mClassLoader;
     private String TAG= PluginContextWrapper.class.getSimpleName();
+    private HashMap<String, Constructor<?>> mConstructors = new HashMap<String, Constructor<?>>();
+    LayoutInflater.Factory mFactory = new LayoutInflater.Factory() {
+
+        @Override
+        public View onCreateView(String name, Context context, AttributeSet attrs) {
+            return handleCreateView(name, context, attrs);
+        }
+    };
  
     public PluginContextWrapper(Context base, Resources resources, ClassLoader classLoader) {
         super(base, android.R.style.Theme);
@@ -31,9 +44,8 @@ public class PluginContextWrapper extends ContextThemeWrapper {
         if (LAYOUT_INFLATER_SERVICE.equals(name)) {
             if (mInflater == null) {
                 LayoutInflater inflater = (LayoutInflater) super.getSystemService(name);
-//                // 新建一个，设置其工厂
+                inflater.setFactory(mFactory);
                 mInflater = inflater.cloneInContext(this);
-//                mInflater = new MyLayoutInflater(this);
             }
             return mInflater;
         }
@@ -75,36 +87,59 @@ public class PluginContextWrapper extends ContextThemeWrapper {
         return super.getClassLoader();
     }
 
+    private final View handleCreateView(String name, Context context, AttributeSet attrs) {
 
-    static class MyLayoutInflater extends LayoutInflater {
+        // 构造器缓存
+        Constructor<?> construct = mConstructors.get(name);
 
-        protected MyLayoutInflater(Context context) {
-            super(context);
+        // 缓存失败
+        if (construct == null) {
+            // 找类
+            Class<?> c = null;
+            boolean found = false;
+            do {
+                try {
+                    c = mClassLoader.loadClass(name);
+                    if (c == null) {
+                        // 没找到，不管
+                        break;
+                    }
+                    if (c == ViewStub.class) {
+                        // 系统特殊类，不管
+                        break;
+                    }
+                    if (c.getClassLoader() != mClassLoader) {
+                        // 不是插件类，不管
+                        break;
+                    }
+                    // 找到
+                    found = true;
+                } catch (ClassNotFoundException e) {
+                    // 失败，不管
+                    break;
+                }
+            } while (false);
+            if (!found) {
+                Log.e(TAG, "layout not found name=" + name);
+                return null;
+            }
+            // 找构造器
+            try {
+                construct = c.getConstructor(Context.class, AttributeSet.class);
+                mConstructors.put(name, construct);
+            } catch (Exception e) {
+                InflateException ie = new InflateException(attrs.getPositionDescription() + ": Error inflating mobilesafe class " + name, e);
+                throw ie;
+            }
         }
 
-        protected MyLayoutInflater(LayoutInflater original, Context newContext) {
-            super(original, newContext);
-        }
-
-        @Override
-        public LayoutInflater cloneInContext(Context newContext) {
-            return LayoutInflater.from(PluginLoader.getInstance().getPluginContextWrapper(newContext));
-        }
-
-        @Override
-        protected View onCreateView(String name, AttributeSet attrs) throws ClassNotFoundException {
-            return super.onCreateView(name, attrs);
-        }
-
-        @Override
-        protected View onCreateView(View parent, String name, AttributeSet attrs) throws ClassNotFoundException {
-            return super.onCreateView(parent, name, attrs);
-        }
-
-        @Nullable
-        @Override
-        public View onCreateView(@NonNull Context viewContext, @Nullable View parent, @NonNull String name, @Nullable AttributeSet attrs) throws ClassNotFoundException {
-            return super.onCreateView(viewContext, parent, name, attrs);
+        // 构造
+        try {
+            View v = (View) construct.newInstance(context, attrs);
+            return v;
+        } catch (Exception e) {
+            InflateException ie = new InflateException(attrs.getPositionDescription() + ": Error inflating mobilesafe class " + name, e);
+            throw ie;
         }
     }
 }
