@@ -6,11 +6,25 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.nfc.Tag;
 import android.util.Log;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import dalvik.system.DexClassLoader;
 
@@ -31,11 +45,6 @@ public class PluginLoader {
 
     public void setContext(Context context) {
         this.context = context.getApplicationContext();
-        TypedArray a = this.context.obtainStyledAttributes(android.support.v7.appcompat.R.styleable.AppCompatTheme);
-        if (!a.hasValue(android.support.v7.appcompat.R.styleable.AppCompatTheme_windowActionBar)) {
-            a.recycle();
-            Log.i("crash", "crash");
-        }
     }
 
     public void loadApk(String dexPath) {
@@ -43,7 +52,9 @@ public class PluginLoader {
 
         pluginPackageArchiveInfo = context.getPackageManager().getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
 
-        createResources(dexPath);
+        createMergedResourcesByReflect(dexPath);
+
+        loadSoFiles(dexPath);
     }
 
     /**
@@ -111,6 +122,108 @@ public class PluginLoader {
         }
         pluginResources = new Resources(assetManager, context.getResources().getDisplayMetrics(),
                 context.getResources().getConfiguration());
+    }
+
+    private void loadSoFiles(String dexPath) {
+
+        List<String> soPaths = loadSOPathsFromAsset();
+        if (soPaths == null || soPaths.isEmpty()) {
+            return;
+        }
+        File toDir = context.getDir("libs", Context.MODE_PRIVATE);
+        List<ZipEntry> foundEntries = new ArrayList<>();
+        File apkFile = new File(dexPath);
+        ZipFile zipFile = null;
+        try {
+            zipFile = new SafeZipFile(apkFile);
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                if (soPaths.contains(entry.getName())) {
+                    foundEntries.add(entry);
+                }
+            }
+            if (foundEntries.isEmpty()) {
+                throw new RuntimeException("未找到需要加载的so文件：" + soPaths.toString());
+            }
+
+            for (ZipEntry entry : foundEntries) {
+                InputStream inputStream = null;
+                try {
+                    inputStream = zipFile.getInputStream(entry);
+                    String soPath = entry.getName();
+                    String soName = soPath.substring(soPath.lastIndexOf("/") + 1);
+                    BufferedOutputStream output = null;
+                    try {
+                        File outputFile = new File(toDir, soName);
+                        if (outputFile.exists()) {
+                            outputFile.delete();
+                        }
+                        output = new BufferedOutputStream(
+                                new FileOutputStream(outputFile));
+                        BufferedInputStream input = new BufferedInputStream(inputStream);
+                        byte b[] = new byte[8192];
+                        int n;
+                        while ((n = input.read(b, 0, 8192)) >= 0) {
+                            output.write(b, 0, n);
+                        }
+                    } finally {
+                        if (output != null) {
+                            output.close();
+                        }
+                    }
+                } finally {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                }
+            }
+        } catch (Exception e) {
+
+        } finally {
+            try {
+                if (zipFile != null) {
+                    zipFile.close();
+                }
+            } catch (IOException e) {
+            }
+        }
+
+        File[] currentOrderSoFiles = new File[soPaths.size()];
+        for (int i = 0; i < soPaths.size(); i++) {
+            String soPath = soPaths.get(i);
+            String soName = soPath.substring(soPath.lastIndexOf("/") + 1);
+            currentOrderSoFiles[i] = new File(toDir, soName);
+        }
+        for (int i = 0; i < currentOrderSoFiles.length; i++) {
+            File soFile = currentOrderSoFiles[i];
+            if (soFile.exists()) {
+                try {
+                    System.load(soFile.getAbsolutePath());
+                    Log.i("PluginLoader", "so完成: " + soFile.getAbsolutePath());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+    }
+
+    public List<String> loadSOPathsFromAsset() {
+        List<String> paths = new ArrayList<>();
+        try {
+            InputStream is = getPluginResources().getAssets().open("plugin_so_paths.txt");
+            BufferedReader bf = new BufferedReader(new InputStreamReader(is));
+            String line;
+            while ((line = bf.readLine()) != null) {
+                paths.add(line);
+            }
+            is.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return paths;
     }
 
     public PluginActivityInterface loadActivity(String activityName) {

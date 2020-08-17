@@ -54,4 +54,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, FragmentPluginActivity.class);
         this.startActivity(intent);
     }
+
+    public void jniPluginClick(View button) {
+        Intent intent = new Intent(this, JniPluginActivity.class);
+        this.startActivity(intent);
+    }
 }

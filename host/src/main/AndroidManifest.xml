@@ -19,6 +19,7 @@
         <activity android:name=".ProxyActivity"/>
         <activity android:name=".ViewHolderPluginActivity"/>
         <activity android:name=".FragmentPluginActivity"/>
+        <activity android:name=".JniPluginActivity"/>
     </application>
 
 </manifest>

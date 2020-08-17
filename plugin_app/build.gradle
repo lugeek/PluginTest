@@ -30,6 +30,12 @@ android {
         // 为了保证插件和宿主的id不冲突，将插件id的前缀改成0x70
         additionalParameters '--allow-reserved-package-id', '--package-id', '0x70'
     }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
 }
 
 dependencies {

@@ -34,4 +34,11 @@
         android:text="Fragment插件化"
         android:onClick="fragmentPluginClick"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="so文件插件化"
+        android:onClick="jniPluginClick"/>
+
 </LinearLayout>
