@@ -2,11 +2,9 @@ package com.lugeek.pluginapptest;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.TypedArray;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import com.lugeek.plugin_base.FileUtil;
@@ -57,6 +55,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void jniPluginClick(View button) {
         Intent intent = new Intent(this, JniPluginActivity.class);
+        this.startActivity(intent);
+    }
+
+    public void douyinPluginClick(View button) {
+        Intent intent = new Intent(this, DouYinPluginActivity.class);
         this.startActivity(intent);
     }
 }
