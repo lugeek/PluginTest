@@ -1,24 +1,28 @@
 package com.lugeek.pluginapptest.plugin;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.res.Resources;
-import android.support.v7.app.AppCompatActivity;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
 import com.lugeek.plugin_base.PluginActivityInterface;
+import com.lugeek.plugin_base.PluginContextWrapper;
 import com.lugeek.plugin_base.PluginLoader;
 
-public class MainActivity extends AppCompatActivity implements PluginActivityInterface {
+public class MainActivity extends Activity implements PluginActivityInterface {
 
-    private AppCompatActivity mHostContext;
+    private Activity mHostContext;
+    private PluginContextWrapper mPluginContextWrapper;
 
     @SuppressLint("MissingSuperCall")
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        mHostContext.setContentView(LayoutInflater.from(mHostContext).inflate(R.layout.activity_main, null, false));
+        mHostContext.setContentView(LayoutInflater.from(mPluginContextWrapper).inflate(R.layout.plugin_activity_main, null, false));
         mHostContext.findViewById(R.id.zan).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -27,9 +31,15 @@ public class MainActivity extends AppCompatActivity implements PluginActivityInt
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
-    public void attachContext(AppCompatActivity context) {
+    public void attachContext(Activity context) {
         mHostContext = context;
+//        Resources.Theme theme = PluginLoader.getInstance().getPluginResources().newTheme();
+//        theme.setTo(context.getTheme());
+        mPluginContextWrapper = new PluginContextWrapper(context,
+                PluginLoader.getInstance().getPluginResources(),
+                PluginLoader.getInstance().getPluginDexClassLoader());
     }
 
     @Override

@@ -4,11 +4,13 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.support.v7.view.ContextThemeWrapper;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,7 +39,12 @@ public class PluginContextWrapper extends ContextThemeWrapper {
         this.mClassLoader=classLoader;
     }
  
- 
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public PluginContextWrapper(Context base, Resources.Theme theme, Resources resources, ClassLoader classLoader) {
+        super(base, theme);
+        this.mResources = resources;
+        this.mClassLoader = classLoader;
+    }
  
     @Override
     public Object getSystemService(String name) {
@@ -70,8 +77,7 @@ public class PluginContextWrapper extends ContextThemeWrapper {
  
         return super.getResources();
     }
- 
- 
+
     /**
      *  重写getClassLoader()方法，
      *  布局渲染时加载插件包里面的class文件

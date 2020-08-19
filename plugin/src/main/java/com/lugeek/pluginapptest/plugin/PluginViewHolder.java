@@ -1,10 +1,7 @@
 package com.lugeek.pluginapptest.plugin;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +28,7 @@ public class PluginViewHolder extends RecyclerView.ViewHolder implements PluginV
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setImageResource(R.drawable.plugin);
+                imageView.setImageResource(R.drawable.plugin_plugin);
             }
         });
     }

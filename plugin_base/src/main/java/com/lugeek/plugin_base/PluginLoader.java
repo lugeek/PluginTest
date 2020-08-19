@@ -42,7 +42,7 @@ public class PluginLoader {
         pluginPackageArchiveInfo.applicationInfo.sourceDir = dexPath;
         pluginPackageArchiveInfo.applicationInfo.nativeLibraryDir = libPath.getAbsolutePath();
 
-        createResources(dexPath);
+        createMergedResourcesByReflect(dexPath);
 
         PluginNativeLibsHelper.install(dexPath, libPath);
 
